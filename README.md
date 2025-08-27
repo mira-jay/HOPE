@@ -1,2 +1,2 @@
-# PurplePatch
-This is the code base for the Purple Patch
+# HOPE
+This is the code base for HOPE
