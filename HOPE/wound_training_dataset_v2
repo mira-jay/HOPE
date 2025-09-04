@@ -1,0 +1,77 @@
+import blenderproc as bproc
+import os
+import imageio
+import numpy as np
+import random
+
+# --- Setup paths ---
+wound_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/wound_textures"
+out_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/wound_training_spheres"
+os.makedirs(out_dir, exist_ok=True)
+
+# --- Init BlenderProc ---
+bproc.init()
+
+# --- Init random ---
+rng = np.random.default_rng()
+
+
+# --- Make a simple plane (the "skin") ---
+plane = bproc.object.create_primitive("PLANE", scale=[2, 2, 2])
+plane.set_location([0, 0, 0])
+
+# --- Load light ---
+light = bproc.types.Light()
+light.set_type("AREA")
+light.set_location([0, 0, 2])
+light.set_energy(1000)
+
+
+# --- Load cameras ---
+bproc.camera.set_resolution(512, 512)
+
+# --- Collect all PNG wound images ---
+wound_files = [f for f in os.listdir(wound_dir) if f.endswith(".png")]
+
+print("Found wound textures:", wound_files)
+
+# --- For each wound PNG, render from multiple views ---
+for i, wound_file in enumerate(wound_files):
+    
+    wound_path = os.path.join(wound_dir, wound_file)
+
+    for j in range(2):
+
+        # Create a new material from that PNG
+        wound_tex = bproc.material.create_material_from_texture(wound_path, f"WoundTex_{i}")
+        plane.replace_materials(wound_tex)
+
+        '''#Vary light position and energy
+        lit_x = rng.uniform(-1.5, 1.5)
+        lit_y = rng.uniform(-1.5, 1.5)
+        lit_z = rng.uniform(1.0, 2.0)
+        light.set_location([lit_x, lit_y, lit_z])
+        light.set_energy(rng.uniform(1000, 3000))
+        '''
+            
+        # Sample a random pose on the plane surface
+        cam_x = rng.uniform(-1.5,1.5)
+        cam_y = rng.uniform(-1.5,1.5)
+        cam_z = rng.uniform(1.0,2.0)
+        cam_pose = bproc.math.build_transformation_mat([cam_x, cam_y, cam_z], [0, 0, 0])
+        bproc.camera.add_camera_pose(cam_pose)
+        
+
+        # Render one frame
+        data = bproc.renderer.render()
+        rgb = data["colors"][-1]
+
+        # Save with unique filename
+        out_path = os.path.join(out_dir, f"{i:03d}_{j:02d}.png")
+        imageio.imwrite(out_path, rgb)
+        
+        print("Saved:", out_path)
+        #bproc.camera.clear_camera_poses()  # Clear previous poses
+       
+
+print("Done! All renders are in:", out_dir)
