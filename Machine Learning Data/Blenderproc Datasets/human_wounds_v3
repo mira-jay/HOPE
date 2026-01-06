@@ -1,0 +1,179 @@
+import blenderproc as bproc
+import bpy
+import os
+import imageio
+import numpy as np
+import random
+from PIL import Image, ImageDraw
+
+# --- Setup paths ---
+wound_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/wound_textures_v2"
+out_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/human_wounds/v3"
+os.makedirs(out_dir, exist_ok=True)
+
+# --- make circle with transparency ---
+def make_red_circle(path, size=512, radius_frac=0.3):
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))  # transparent background
+    draw = ImageDraw.Draw(img)
+    radius = int(size * radius_frac)
+    center = size // 2
+    draw.ellipse(
+        [center - radius, center - radius, center + radius, center + radius],
+        fill=(255, 0, 0, 255)
+    )
+    img.save(path)
+
+# --- Init BlenderProc ---
+bproc.init()
+# --- Load cameras ---
+bproc.camera.set_resolution(512, 512)
+
+def render_one_pose(cam_pose, out_path):
+    # Clear previous camera poses
+    bproc.camera.add_camera_pose(cam_pose)
+    data = bproc.renderer.render()
+    rgb = data["colors"][0]
+    imageio.imwrite(out_path, rgb)
+
+# --- Init random ---
+rng = np.random.default_rng()
+
+
+# --- Make a simple plane (the "skin") ---
+body = bproc.loader.load_obj("HOPE/bodies/human_boy_v1.obj")[0]
+body.set_location([3, 0, 0])   # center at origin
+body.set_scale([0.5, 0.5, 0.5])  # adjust scaling (try smaller or larger if not visible)
+body.set_rotation_euler([0, 0, np.pi/2]) # Rotate body 90 degrees around Z-axis
+
+
+# --- Load light ---
+light = bproc.types.Light()
+light.set_type("AREA")
+light.set_location([0, 0, 9])
+light.set_energy(3000)
+
+
+# --- Make circles ---
+for i in range(5):
+    make_red_circle(os.path.join(wound_dir, f"wound_{i:04d}.png"), 
+                    radius_frac=rng.uniform(0.1, 0.3))
+
+# --- Collect all PNG wound images ---
+wound_files = [f for f in os.listdir(wound_dir) if f.endswith(".png")]
+print("Found wound textures:", wound_files)
+
+'''
+# Approach 1: Create a composite material for the body with wound overlay
+def create_body_material_with_wound(body_obj, wound_texture_path, wound_location, wound_scale=0.1):
+    """Create a material that combines the body texture with a wound decal"""
+    
+    # Create new material
+    mat = bproc.material.create(f"BodyWithWound")
+    
+    # Get material nodes and links
+    nodes = mat.get_nodes()
+    links = mat.get_links()
+    
+    # Remove default principled BSDF to start fresh
+    principled = nodes.get("Principled BSDF")
+    material_output = nodes.get("Material Output")
+    
+    # Add texture coordinate node for UV mapping
+    tex_coord = nodes.new(type='ShaderNodeTexCoord')
+    
+    # Add mapping node for positioning the wound
+    mapping = nodes.new(type='ShaderNodeMapping')
+    mapping.inputs['Location'].default_value = wound_location  # [X, Y, Z] offset
+    mapping.inputs['Scale'].default_value = [wound_scale, wound_scale, wound_scale]
+    
+    # Add wound texture
+    wound_tex = nodes.new(type='ShaderNodeTexImage')
+    wound_tex.image = bpy.data.images.load(wound_texture_path)
+    wound_tex.image.alpha_mode = 'STRAIGHT'
+    
+    # Add base body color (or you could load a body texture here)
+    body_color = nodes.new(type='ShaderNodeRGB')
+    body_color.outputs[0].default_value = [0.8, 0.7, 0.6, 1.0]  # Skin tone
+    
+    # Add mix node to blend body color with wound
+    mix_shader = nodes.new(type='ShaderNodeMix')
+    mix_shader.data_type = 'RGBA'
+    mix_shader.blend_type = 'MIX'
+    
+    # Connect nodes
+    links.new(tex_coord.outputs['UV'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], wound_tex.inputs['Vector'])
+    
+    # Mix the body color with wound texture using wound alpha
+    links.new(body_color.outputs['Color'], mix_shader.inputs['Color1'])  # Base body
+    links.new(wound_tex.outputs['Color'], mix_shader.inputs['Color2'])   # Wound
+    links.new(wound_tex.outputs['Alpha'], mix_shader.inputs['Fac'])      # Use wound alpha as blend factor
+    
+    # Connect to principled BSDF
+    links.new(mix_shader.outputs['Color'], principled.inputs['Base Color'])
+    
+    return mat
+    '''
+
+# Simple approach: Apply wound texture directly to body
+def apply_wound_to_body(body_obj, wound_texture_path):
+    """Apply wound texture directly to the body using BlenderProc's built-in methods"""
+    
+    # Create material from the wound texture - this handles transparency automatically
+    wound_mat = bproc.material.create_material_from_texture(wound_texture_path, "WoundOnBody")
+    
+    # Configure transparency settings
+    wound_mat.blender_obj.blend_method = 'BLEND'
+    wound_mat.blender_obj.show_transparent_back = False
+    
+    return wound_mat
+
+
+# Store original body material to restore later
+original_materials = body.get_materials()
+
+
+for i, wound_file in enumerate(wound_files):
+    # Clear previous camera poses
+    bproc.utility.reset_keyframes()
+    
+    wound_path = os.path.join(wound_dir, wound_file)
+    print(f"Processing wound {i}: {wound_path}")
+
+    # Restore original materials first
+    body.clear_materials()
+    for mat in original_materials:
+        body.add_material(mat)
+    
+    # Choose your approach:
+    
+    # Simple approach (recommended for testing):
+    wound_mat = apply_wound_to_body(body, wound_path)
+    
+    # Advanced approach (for more control):
+    # Random location for wound on UV space
+    # wound_uv_location = [
+    #     np.random.uniform(-0.5, 0.5),  # U coordinate
+    #     np.random.uniform(-0.5, 0.5),  # V coordinate  
+    #     0  # Z not used for UV
+    # ]
+    # wound_mat = create_body_material_with_wound_advanced(body, wound_path, wound_uv_location, wound_scale=0.05)
+    
+    # Apply the wound material to the body
+    body.add_material(wound_mat)
+    
+    # Set transparency in render settings
+    bpy.context.scene.render.film_transparent = True
+    
+    # Set camera pose
+    pose = bproc.math.build_transformation_mat([0, 0, 9], [0, 0, 0])
+    
+    # Save with unique filename
+    out_path = os.path.join(out_dir, f"{i:03d}.png")
+    render_one_pose(pose, out_path)
+    
+    print("Saved:", out_path)
+
+print("Done! All renders are in:", out_dir)
+
+#no result save for white body.
