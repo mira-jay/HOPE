@@ -1,0 +1,68 @@
+import lgpio as GPIO
+import time
+import xarm
+
+# set arm output location
+arm = xarm.Controller("USB")
+
+# set pins
+TRIG = 23
+ECHO = 24
+
+# set arm starting location
+servo1 = xarm.Servo(1) #assumes default unit position 500
+servo2 = xarm.Servo(2, 300) #unit position 300
+servo3 = xarm.Servo(3, 90.0) #angle 90 degrees
+
+# open the gpio chip and set the gpio direction
+h = GPIO.gpiochip_open(0)
+GPIO.gpio_claim_output(h, TRIG)
+GPIO.gpio_claim_input(h, ECHO)
+
+def get_distance():
+	# set trig low
+	GPIO.gpio_write(h, TRIG, 0)
+	time.sleep(2)
+	
+	
+	# send 10us pulse to trig
+	GPIO.gpio_write(h, TRIG, 1)
+	time.sleep(0.00001)
+	GPIO.gpio_write(h, TRIG, 0)
+	
+	
+	# start recording the time when the wave is sent
+	while GPIO.gpio_read(h, ECHO) == 0:
+		pulse_start = time.time()
+		
+		
+	# record time of arrival
+	while GPIO.gpio_read(h, ECHO) == 1:
+		pulse_end = time.time()
+	
+
+	# calculate the difference in times
+	pulse_duration = pulse_end - pulse_start
+	
+	# multiply with the sonic speed (34300 cm/s)
+	# and divide by 2 to avoid counting both distances there and back
+	distance = pulse_duration * 17150
+	distance = round(distance, 2)
+	
+	return distance
+
+if __name__ == '__main__':
+	try:
+		while True:
+			dist = get_distance()
+			print("Measured distance = {:.2f} cm".format(dist))
+			time.sleep(1)
+			if dist <= 5.00:
+				arm.setPosition(3, 45.0, wait=True)
+				
+	# reset by pressing ctrl c
+	except KeyboardInterrupt:
+		print("Measurement stopped by user")
+		GPIO.gpiochip_close(h)
+
+
