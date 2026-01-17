@@ -1,0 +1,130 @@
+import blenderproc as bproc
+import bpy
+import blenderproc.python.types.MeshObjectUtility as MeshObjectUtility
+import os
+import imageio
+import numpy as np
+import random
+from PIL import Image, ImageDraw
+
+# --- Setup paths ---
+wound_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/wound_textures_v2"
+out_dir = "/Users/Mira/Projects/Git Repository/HOPE/output/human_wounds/v2"
+os.makedirs(out_dir, exist_ok=True)
+
+# --- make circle with transparency ---
+def make_red_circle(path, size=512, radius_frac=0.3):
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))  # transparent background
+    draw = ImageDraw.Draw(img)
+    radius = int(size * radius_frac)
+    center = size // 2
+    draw.ellipse(
+        [center - radius, center - radius, center + radius, center + radius],
+        fill=(255, 0, 0, 255)
+    )
+    img.save(path)
+
+# --- Init BlenderProc ---
+bproc.init()
+# --- Load cameras ---
+bproc.camera.set_resolution(512, 512)
+
+def render_one_pose(cam_pose, out_path):
+    # Clear previous keyframes so we render exactly one frame
+    cam = bpy.context.scene.camera
+    if cam and cam.animation_data:
+        cam.animation_data_clear()
+    bpy.context.scene.frame_start = 1
+    bpy.context.scene.frame_end = 1
+
+    # Add one pose at frame 1 and render
+    bproc.camera.add_camera_pose(cam_pose, frame=1)
+    data = bproc.renderer.render()
+    rgb = data["colors"][0]
+    imageio.imwrite(out_path, rgb)
+
+# --- Init random ---
+rng = np.random.default_rng()
+
+
+# --- Make a simple plane (the "skin") ---
+body = bproc.loader.load_obj("HOPE/bodies/human_boy_v1.obj")[0]
+body_mesh = MeshObjectUtility.MeshObject(bpy.context.object)
+
+body.set_location([3, 0, 0])   # center at origin
+body.set_scale([0.5, 0.5, 0.5])  # adjust scaling (try smaller or larger if not visible)
+body.set_rotation_euler([0, 0, np.pi/2]) # Rotate body 90 degrees around Z-axis
+
+
+# --- Load light ---
+light = bproc.types.Light()
+light.set_type("AREA")
+light.set_location([0, 0, 9])
+light.set_energy(3000)
+
+
+# --- Make circles ---
+for i in range(5):
+    make_red_circle(os.path.join(wound_dir, f"wound_{i:04d}.png"), 
+                    radius_frac=rng.uniform(0.1, 0.3))
+
+# --- Collect all PNG wound images ---
+wound_files = [f for f in os.listdir(wound_dir) if f.endswith(".png")]
+
+print("Found wound textures:", wound_files)
+
+for i, wound_file in enumerate(wound_files):
+    
+    wound_path = os.path.join(wound_dir, wound_file)
+
+    # Pick a random vertex from the body
+    #v = random.choice(body.get_mesh_vertices())
+    #pos = v.get_local_location()
+    #normal = v.get_local_normal()
+
+    # Make wound plane slightly above surface
+    wound_plane = bproc.object.create_primitive("PLANE", scale=[0.2, 0.2, 0.2])
+    wound_plane.set_location([0, 0, 5])
+    #wound_plane.set_location(pos + 0.01 * normal)  # pick location on body
+    #wound_plane.look_at(pos + normal)  # align Z axis with vertex normal
+    wound_plane.set_rotation_euler([0, 0, 0])
+
+    # Apply wound texture with transparency
+    wound_tex = bproc.material.create_material_from_texture(wound_path, f"WoundTex_{i}")
+    #for m in wound_plane.get_materials():
+    
+    #m.map_cycles.double_sided = True
+    #wound_plane.replace_materials(wound_tex)
+    
+    pose = bproc.math.build_transformation_mat([0,0,9], [0, 0, 0])
+     # Save with unique filename
+    out_path = os.path.join(out_dir, f"{i:03d}.png")
+    render_one_pose(pose, out_path)
+    
+        
+    print("Saved:", out_path)
+    #bproc.camera.clear_camera_poses() not a function
+    
+       
+
+print("Done! All renders are in:", out_dir)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

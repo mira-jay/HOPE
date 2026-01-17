@@ -1,0 +1,95 @@
+
+import blenderproc as bproc
+import bpy
+import numpy as np
+import os
+import imageio
+
+# ---------- helper: make a simple "wound" image (red circle on skin bg) ----------
+def make_red_circle(path, size=512, radius_frac=0.25, x_off=0.0, y_off=0.0,
+                    bg=(0.95, 0.84, 0.76), color=(0.75, 0.05, 0.05)):
+    """Creates a PNG with a red circle you can later replace with real wound images."""
+    h = w = int(size)
+    img = np.empty((h, w, 3), dtype=np.float32)
+    img[:] = bg  # skin-ish background
+
+    yy, xx = np.mgrid[0:h, 0:w]
+    cx = w * (0.5 + x_off)
+    cy = h * (0.5 + y_off)
+    r  = radius_frac * min(w, h)
+    mask = (xx - cx) ** 2 + (yy - cy) ** 2 <= r * r
+    img[mask] = color
+
+    imageio.imwrite(path, (np.clip(img, 0, 1) * 255).astype(np.uint8))
+
+# ---------- init + scene ----------
+bproc.init()
+
+# If your version supports it, keep; if not, you can comment this out.
+try:
+    bproc.camera.set_resolution(640, 640)
+except AttributeError:
+    pass
+
+# Plane that will carry the wound texture
+plane = bproc.object.create_primitive('PLANE', scale=[1.6, 1.6, 1])
+plane.set_location([0, 0, 0])
+
+# Camera above the plane looking down (-Z is the default camera view direction)
+cam_pose = bproc.math.build_transformation_mat([0, 0, 1.6], [0, 0, 0])
+bproc.camera.add_camera_pose(cam_pose)
+
+# Soft area light above the plane for even illumination
+light = bproc.types.Light()
+light.set_type("AREA")
+light.set_location([0, 0, 2.5])
+light.set_energy(2000)
+
+# ---------- output dirs ----------
+out_dir = "/Users/Mira/Projects/Git Repository/HOPE/output"
+wound_dir = os.path.join(out_dir, "wound_textures")
+os.makedirs(wound_dir, exist_ok=True)
+os.makedirs(out_dir, exist_ok=True)
+
+# ---------- generate a few practice renders ----------
+num_images = 5
+rng = np.random.default_rng()
+
+for i in range(num_images):
+    # 1) make a wound texture with random size/offset (position on the "skin")
+    wound_path = os.path.join(wound_dir, f"wound_{i:04d}.png")
+    make_red_circle(
+        wound_path,
+        size=512,
+        radius_frac=float(rng.uniform(0.12, 0.35)),
+        x_off=float(rng.uniform(-0.25, 0.25)),
+        y_off=float(rng.uniform(-0.25, 0.25))
+    )
+
+    print("Using wound texture:", wound_path)
+
+    # 2) create & assign a material that uses that texture as Base Color
+    mat = bproc.material.create(f"WoundMat_{i}")
+    '''
+    mat.make_emissive([1, 1, 1, 1])  # ensures material is visible
+    mat_nodes = mat.get_nodes()
+    wound_node = mat_nodes.new("ShaderNodeTexImage")
+    wound_node.image = bpy.data.images.load(wound_path)
+    mat.get_principled_shader().inputs["Base Color"].default_value = wound_node.outputs["Color"]
+    '''
+    
+    wound_tex = bproc.material.create_material_from_texture(wound_path, "WoundTex")
+    
+    #mat.set_principled_shader_value("Roughness", 0.85)
+    #mat.set_principled_shader_value("Specular", 0.1)
+    
+    plane.replace_materials(wound_tex)
+
+    # 3) render one frame (returns a dict; we use the RGB frame)
+    data = bproc.renderer.render()
+    rgb = data["colors"][0]
+
+    # 4) save as a unique file (no overwriting)
+    imageio.imwrite(os.path.join(out_dir, f"wound_rgb_{i:04d}.png"), rgb)
+
+print(f"Done! Check: {out_dir}")
