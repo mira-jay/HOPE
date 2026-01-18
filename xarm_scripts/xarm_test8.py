@@ -1,4 +1,5 @@
 import xarm
+import time
 
 blue = xarm.Controller("USBD30F103095D182300023D4D4")
 
@@ -16,6 +17,7 @@ blue.setPosition(5, 500, wait=True)
 blue.setPosition(6, 150, wait=True)
 blue.setPosition(4, 830, wait = True)
 blue.setPosition(3, 138, wait = True)
+time.sleep(5.00)
 
 #take it out
 blue.setPosition(3, 870, wait = True)

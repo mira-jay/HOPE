@@ -13,33 +13,41 @@ AN21 = 24
 AN22 = 25
 BN21 = 26
 BN22 = 16
+
+h = None
 temp1=1
+p1 = None
+p2 = None
 
+def init():
 
-h = GPIO.gpiochip_open(0)
-#Define pin as output signal
-GPIO.gpio_claim_output(h, NSLEEP1)
-GPIO.gpio_claim_output(h, NSLEEP2)
-GPIO.gpio_claim_output(h, AN11)
-GPIO.gpio_claim_output(h, AN12)
-GPIO.gpio_claim_output(h, BN11)
-GPIO.gpio_claim_output(h, BN12)
-GPIO.gpio_claim_output(h, AN21)
-GPIO.gpio_claim_output(h, AN22)
-GPIO.gpio_claim_output(h, BN21)
-GPIO.gpio_claim_output(h, BN22)
+    global h, p1, p2, temp1
+    h = GPIO.gpiochip_open(0)
 
-#Initialize the motor drive signal so that the motor is in a stopped state
-GPIO.gpio_write(h, AN11, 0)
-GPIO.gpio_write(h, AN12, 0)
-GPIO.gpio_write(h, BN11, 0)
-GPIO.gpio_write(h, BN12, 0)
-GPIO.gpio_write(h, AN21, 0)
-GPIO.gpio_write(h, AN22, 0)
-GPIO.gpio_write(h, BN21, 0)
-GPIO.gpio_write(h, BN22, 0)
-p1=GPIO.tx_pwm(h, NSLEEP1, 1000, 30)#Define p1 as a pulse signal of 1000 Hz and duty cycle of 30%
-p2=GPIO.tx_pwm(h, NSLEEP2, 1000, 30)#Define p2 as a pulse signal of 1000 Hz and duty cycle of 30%
+    #Define pin as output signal
+    GPIO.gpio_claim_output(h, NSLEEP1)
+    GPIO.gpio_claim_output(h, NSLEEP2)
+    GPIO.gpio_claim_output(h, AN11)
+    GPIO.gpio_claim_output(h, AN12)
+    GPIO.gpio_claim_output(h, BN11)
+    GPIO.gpio_claim_output(h, BN12)
+    GPIO.gpio_claim_output(h, AN21)
+    GPIO.gpio_claim_output(h, AN22)
+    GPIO.gpio_claim_output(h, BN21)
+    GPIO.gpio_claim_output(h, BN22)
+
+    #Initialize the motor drive signal so that the motor is in a stopped state
+    GPIO.gpio_write(h, AN11, 0)
+    GPIO.gpio_write(h, AN12, 0)
+    GPIO.gpio_write(h, BN11, 0)
+    GPIO.gpio_write(h, BN12, 0)
+    GPIO.gpio_write(h, AN21, 0)
+    GPIO.gpio_write(h, AN22, 0)
+    GPIO.gpio_write(h, BN21, 0)
+    GPIO.gpio_write(h, BN22, 0)
+
+    p1=GPIO.tx_pwm(h, NSLEEP1, 1000, 30)#Define p1 as a pulse signal of 1000 Hz and duty cycle of 30%
+    p2=GPIO.tx_pwm(h, NSLEEP2, 1000, 30)#Define p2 as a pulse signal of 1000 Hz and duty cycle of 30%
 
 
 print("\n")
@@ -47,10 +55,13 @@ print("The default speed & direction of motor is LOW & Forward rotation")
 print("r-run s-stop f-forward b-reversal l-low m-medium h-high  e-exit")
 print("\n")    
 
-def control_motor(prompt):
+def control_motor(x):
 
-    x=prompt
-    # GPIO.gpio_write(h, TRIG, 0)
+    global p1, p2, temp1
+
+    if h is None:
+        raise RuntimeError("Motor system not initialized. Call init() first.")
+
     
     if x=='r':
         print("run")
