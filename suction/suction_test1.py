@@ -47,9 +47,9 @@ print("The default speed & direction of motor is LOW & Forward rotation")
 print("r-run s-stop f-forward b-reversal l-low m-medium h-high  e-exit")
 print("\n")    
 
-while(1):
+def control_motor(prompt):
 
-    x=input()
+    x=prompt
     # GPIO.gpio_write(h, TRIG, 0)
     
     if x=='r':
@@ -134,8 +134,6 @@ while(1):
     elif x=='e':
         GPIO.gpiochip_close(h)
         print("User stopped")
-        break
-    
     else:
         print("<<<  wrong data  >>>")
         print("please enter the defined data to continue.....")
