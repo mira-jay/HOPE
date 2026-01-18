@@ -22,6 +22,6 @@ blue.setPosition(3, 870, wait = True)
 blue.setPosition(4, 570, wait = True)
 blue.setPosition(6, 540, wait = True)
 blue.setPosition(5, 1000, wait = True)
-
+#with this code, an air pump can be added to provide suction.
 
 
