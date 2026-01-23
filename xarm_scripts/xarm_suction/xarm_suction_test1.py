@@ -9,7 +9,7 @@ suction_test1.init()
 
 suction_test1.control_motor("h")
 suction_test1.control_motor("r")
-time.sleep(5.00)
+time.sleep(10.00)
 
 
 suction_test1.control_motor("s")
