@@ -46,8 +46,8 @@ def init():
     GPIO.gpio_write(h, BN21, 0)
     GPIO.gpio_write(h, BN22, 0)
 
-    p1=GPIO.tx_pwm(h, NSLEEP1, 1000, 30)#Define p1 as a pulse signal of 1000 Hz and duty cycle of 30%
-    p2=GPIO.tx_pwm(h, NSLEEP2, 1000, 30)#Define p2 as a pulse signal of 1000 Hz and duty cycle of 30%
+    p1=GPIO.tx_pwm(h, NSLEEP1, 1000, 20)#Define p1 as a pulse signal of 1000 Hz and duty cycle of 30%
+    p2=GPIO.tx_pwm(h, NSLEEP2, 1000, 20)#Define p2 as a pulse signal of 1000 Hz and duty cycle of 30%
 
 
 print("\n")
@@ -150,3 +150,13 @@ def control_motor(x):
         print("please enter the defined data to continue.....")
 
 
+
+init()
+#control_motor("h")
+control_motor("b")
+control_motor("r")
+
+sleep(10.00)
+
+
+control_motor("s")
