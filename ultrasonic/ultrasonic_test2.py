@@ -13,7 +13,7 @@ GPIO.gpio_claim_input(h, ECHO)
 def get_distance():
 	# set trig low
 	GPIO.gpio_write(h, TRIG, 0)
-	time.sleep(2)
+	time.sleep(1)
 	
 	
 	# send 10us pulse to trig
@@ -42,15 +42,4 @@ def get_distance():
 	distance = round(distance, 2)
 	
 	return distance
-
-if __name__ == '__main__':
-	#try:
-	while True:
-		dist = get_distance()
-		print("Measured distance = {:.2f} cm".format(dist))
-		time.sleep(1)
-	# reset by pressing ctrl c
-	#except KeyboardInterrupt:
-		#("Measurement stopped by user")
-		#GPIO.gpiochip_close(h)
 
