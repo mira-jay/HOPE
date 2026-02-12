@@ -1,0 +1,423 @@
+================================================================================
+  ARDUINO UNO  ←→  BIGTREETECH TMC2209 V1.2  WIRING DIAGRAM
+  HOPE Project — Stepper Motor Driver Pinout Reference
+================================================================================
+
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                         WIRING OVERVIEW                                │
+  ├─────────────────────────────────────────────────────────────────────────┤
+  │                                                                         │
+  │  ARDUINO UNO              BTT TMC2209              STEPPER MOTOR       │
+  │  ┌─────────┐             ┌───────────┐             ┌──────────┐        │
+  │  │     D2 ─┼─── STEP ───┤ STEP      │             │          │        │
+  │  │     D3 ─┼─── DIR  ───┤ DIR       │     A1/A2 ──┤ Coil A   │        │
+  │  │     D4 ─┼─── EN   ───┤ EN        │     B1/B2 ──┤ Coil B   │        │
+  │  │     5V ─┼─── VIO  ───┤ VCC_IO    │             └──────────┘        │
+  │  │    GND ─┼─── GND  ───┤ GND       │                                  │
+  │  └─────────┘             │     VMOT ─┼─── 12-24V DC Supply (+)         │
+  │                          │      GND ─┼─── 12-24V DC Supply (-)         │
+  │                          └───────────┘                                  │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+  FULL PIN-BY-PIN CONNECTION TABLE
+================================================================================
+
+  BTT TMC2209 Pin    Arduino Uno Pin      Notes
+  ─────────────────  ──────────────────   ─────────────────────────────────
+  STEP               D2                   Step pulse input (1 pulse = 1 microstep)
+  DIR                D3                   Direction: HIGH=CW, LOW=CCW
+  EN                 D4                   Enable: LOW=enabled, HIGH=disabled
+  VCC_IO (VIO)       5V                   Logic reference voltage (matches Uno 5V)
+  GND                GND                  Common ground (REQUIRED)
+  PDN_UART (TX)      D6 (SoftSerial TX)   UART: via 1K resistor (optional)
+  PDN_UART (RX)      D7 (SoftSerial RX)   UART: via 1K resistor (optional)
+  MS1                D8 (or VCC/GND)      Microstep select 1 (see table below)
+  MS2                D9 (or VCC/GND)      Microstep select 2 (see table below)
+  DIAG               D10 (optional)       StallGuard output (active HIGH on stall)
+  VMOT               12-24V DC (+)        Motor power supply (NOT from Arduino!)
+  GND (motor side)   12-24V DC (-)        Motor supply ground
+  A1                 Stepper coil A       Motor coil A, wire 1
+  A2                 Stepper coil A       Motor coil A, wire 2
+  B1                 Stepper coil B       Motor coil B, wire 1
+  B2                 Stepper coil B       Motor coil B, wire 2
+
+
+================================================================================
+  BTT TMC2209 MODULE PINOUT (TOP VIEW)
+================================================================================
+
+         Component side facing up, header pins pointing down
+
+                    ┌─────────────────────┐
+                    │   BigTreeTech        │
+                    │     TMC2209 V1.2     │
+                    │                      │
+                    │  ┌───┐    Trinamic   │
+                    │  │   │    TMC2209    │
+                    │  │ IC│    Chip       │
+                    │  │   │              │
+                    │  └───┘              │
+                    │                      │
+          EN   ○────┤ 1            16 ├────○  VM (VMOT)
+          MS1  ○────┤ 2            15 ├────○  GND
+          MS2  ○────┤ 3            14 ├────○  B2
+          PDN  ○────┤ 4            13 ├────○  B1
+          PDN  ○────┤ 5            12 ├────○  A1
+          STEP ○────┤ 6            11 ├────○  A2
+          DIR  ○────┤ 7            10 ├────○  VCC_IO
+          GND  ○────┤ 8             9 ├────○  DIAG
+                    │                      │
+                    └─────────────────────┘
+
+  Note: Pins 4 & 5 (PDN) are the UART data line. On the BTT module,
+  both pins are tied together internally. For UART mode, connect a
+  1K ohm resistor between Arduino TX pin and PDN_UART.
+
+
+================================================================================
+  ARDUINO UNO PINOUT (RELEVANT PINS HIGHLIGHTED)
+================================================================================
+
+                         ┌───── USB ─────┐
+                         │               │
+                    ┌────┴───────────────┴────┐
+                    │                          │
+        RESET ──────┤ RESET            IOREF  ├
+              ──────┤ 3.3V           AREF     ├
+  TMC VCC_IO ←──────┤ 5V ★            GND     ├
+              ──────┤ GND ★           D13     ├
+    TMC GND ←───────┤ GND ★           D12     ├
+              ──────┤ VIN              D11     ├
+                    │                  D10     ├──────→ TMC DIAG (optional)
+              ──────┤ A0                D9     ├──────→ TMC MS2  (optional)
+              ──────┤ A1                D8     ├──────→ TMC MS1  (optional)
+              ──────┤ A2                D7     ├──────→ TMC UART RX (optional)
+              ──────┤ A3                D6     ├──────→ TMC UART TX (optional)
+              ──────┤ A4 (SDA)          D5     ├
+              ──────┤ A5 (SCL)          D4     ├──────→ TMC EN
+                    │                   D3     ├──────→ TMC DIR
+                    │                   D2     ├──────→ TMC STEP
+                    │                   D1 (TX)├
+                    │                   D0 (RX)├
+                    └──────────────────────────┘
+
+                    ★ = Power connections to TMC2209
+
+
+================================================================================
+  MICROSTEP CONFIGURATION (MS1 / MS2)
+================================================================================
+
+  The TMC2209 supports configurable microstepping via the MS1 and MS2 pins.
+  Tie these pins to GND or VCC_IO, or control them with Arduino digital pins.
+
+    MS2      MS1      Microsteps    Steps/Rev (200-step motor)
+    ───────  ───────  ────────────  ──────────────────────────
+    GND      GND       8  (1/8)     1,600
+    GND      VCC      32  (1/32)    6,400
+    VCC      GND      64  (1/64)    12,800
+    VCC      VCC      16  (1/16)    3,200   ← Default (both floating)
+
+  NOTE: When both MS1 and MS2 are left FLOATING (unconnected), the TMC2209
+  defaults to 1/16 microstepping via internal pull-ups.
+
+  In UART mode, MS1 and MS2 also set the UART slave address:
+    MS2=GND  MS1=GND  → Address 0 (0b00)
+    MS2=GND  MS1=VCC  → Address 1 (0b01)
+    MS2=VCC  MS1=GND  → Address 2 (0b10)
+    MS2=VCC  MS1=VCC  → Address 3 (0b11)
+
+
+================================================================================
+  UART WIRING DETAIL (OPTIONAL - For advanced configuration)
+================================================================================
+
+  UART allows runtime configuration of current, microstepping, StealthChop,
+  StallGuard, etc. It uses a single-wire half-duplex protocol.
+
+  Arduino Uno                        BTT TMC2209
+  ┌──────────┐                      ┌──────────┐
+  │          │         1K ohm       │          │
+  │   D6 (TX)├───────[  1K  ]──┬───┤ PDN_UART │
+  │          │                  │   │          │
+  │   D7 (RX)├──────────────────┘   │          │
+  │          │                      │          │
+  │      GND ├──────────────────────┤ GND      │
+  └──────────┘                      └──────────┘
+
+  The 1K resistor on the TX line prevents bus contention during
+  half-duplex communication. Both TX and RX connect to the same
+  PDN_UART pin on the TMC2209.
+
+  Arduino library: TMCStepper (install via Arduino Library Manager)
+    #include <TMCStepper.h>
+    #include <SoftwareSerial.h>
+
+    SoftwareSerial TMC_SERIAL(7, 6);  // RX=D7, TX=D6
+    TMC2209Stepper driver(&TMC_SERIAL, 0.11f, 0);  // R_SENSE, address
+
+
+================================================================================
+  COMPLETE WIRING DIAGRAM (ASCII)
+================================================================================
+
+                       12-24V DC
+                       Power Supply
+                       ┌─────────┐
+                       │  + ─ −  │
+                       └──┬───┬──┘
+                          │   │
+                ┌─────────┤   │
+                │         │   │         ┌─────────────────┐
+                │  ┌──────┘   │         │  NEMA 17        │
+                │  │          │         │  Stepper Motor   │
+                │  │          │         │                  │
+   ┌────────────┴──┴──────────┴──┐      │  Black  ──── A1 │
+   │  BTT TMC2209                │      │  Green  ──── A2 │
+   │                             │      │  Red    ──── B1 │
+   │  VMOT ◄── 12-24V (+)       │      │  Blue   ──── B2 │
+   │  GND  ◄── 12-24V (-)       │      └─────────────────┘
+   │                             │        │  │  │  │
+   │  A1 ────────────────────────┼────────┘  │  │  │
+   │  A2 ────────────────────────┼───────────┘  │  │
+   │  B1 ────────────────────────┼──────────────┘  │
+   │  B2 ────────────────────────┼─────────────────┘
+   │                             │
+   │  VCC_IO ◄── 5V (from Uno)  │          ┌─────────────┐
+   │  GND    ◄── GND            │          │ ARDUINO UNO │
+   │                             │          │             │
+   │  STEP ◄──── D2 ────────────┼──────────┤ D2          │
+   │  DIR  ◄──── D3 ────────────┼──────────┤ D3          │
+   │  EN   ◄──── D4 ────────────┼──────────┤ D4          │
+   │                             │          │             │
+   │  PDN_UART ◄── D6 (via 1K) ─┼──┐       │ D6 (TX)     │
+   │               D7 ──────────┼──┴───────┤ D7 (RX)     │
+   │                             │          │             │
+   │  MS1 ◄──── (GND or VCC)    │          │ 5V ─────────┼──→ VCC_IO
+   │  MS2 ◄──── (GND or VCC)    │          │ GND ────────┼──→ GND
+   │                             │          │             │
+   │  DIAG ──── D10 (optional) ─┼──────────┤ D10         │
+   │                             │          │             │
+   └─────────────────────────────┘          └─────────────┘
+
+                       ┌────────┐
+                       │ 100 uF │  Electrolytic capacitor across VMOT & GND
+                       │  cap   │  (close to TMC2209 module, required!)
+                       └────────┘
+
+
+================================================================================
+  MOTOR WIRE COLOR CODES (COMMON NEMA 17 VARIANTS)
+================================================================================
+
+  Manufacturer   Coil A (A1/A2)   Coil B (B1/B2)    Notes
+  ─────────────  ───────────────  ───────────────   ─────────────────────
+  Standard       Black / Green    Red / Blue         Most common
+  Wantai         Red / Blue       Green / Black      Reversed order
+  Moonshot       Red / Yellow     Green / Gray       Check datasheet
+  StepperOnline  A+ / A-          B+ / B-            Labeled on connector
+
+  TIP: If you don't know the coil pairing, use a multimeter in resistance
+  mode. Wires that belong to the same coil will show 1-10 ohms between
+  them. Wires from different coils show infinite resistance (open circuit).
+
+
+================================================================================
+  CAPACITOR REQUIREMENT
+================================================================================
+
+  CRITICAL: Place a 100uF (or larger) electrolytic capacitor directly
+  across the VMOT and GND pins of the TMC2209, as close as physically
+  possible to the module. This protects against voltage spikes from the
+  inductive motor load.
+
+  Without this cap, the TMC2209 may:
+  - Reset randomly during motor direction changes
+  - Produce erratic motor behavior
+  - Suffer permanent damage from back-EMF spikes
+
+
+================================================================================
+  BASIC ARDUINO SKETCH (Step/Dir Mode)
+================================================================================
+
+  // Arduino Uno + BTT TMC2209 — Basic Step/Dir Control
+  // No UART — simplest possible wiring
+
+  #define STEP_PIN  2
+  #define DIR_PIN   3
+  #define EN_PIN    4
+
+  void setup() {
+    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN,  OUTPUT);
+    pinMode(EN_PIN,   OUTPUT);
+
+    digitalWrite(EN_PIN, LOW);   // LOW = driver enabled
+    digitalWrite(DIR_PIN, HIGH); // Set initial direction
+  }
+
+  void loop() {
+    // Spin motor: 200 full steps = 1 revolution (at 1/8 microstep = 1600 pulses)
+    for (int i = 0; i < 1600; i++) {
+      digitalWrite(STEP_PIN, HIGH);
+      delayMicroseconds(500);       // 500us = 1000us period = 1kHz step rate
+      digitalWrite(STEP_PIN, LOW);
+      delayMicroseconds(500);
+    }
+
+    delay(1000);                    // Pause 1 second
+
+    // Reverse direction
+    digitalWrite(DIR_PIN, !digitalRead(DIR_PIN));
+  }
+
+
+================================================================================
+  BASIC ARDUINO SKETCH (UART Mode with TMCStepper Library)
+================================================================================
+
+  // Arduino Uno + BTT TMC2209 — UART Mode
+  // Requires: TMCStepper library (install from Library Manager)
+  //   Sketch > Include Library > Manage Libraries > search "TMCStepper"
+
+  #include <TMCStepper.h>
+  #include <SoftwareSerial.h>
+
+  #define STEP_PIN    2
+  #define DIR_PIN     3
+  #define EN_PIN      4
+  #define SW_RX       7   // SoftwareSerial RX ← TMC2209 PDN_UART
+  #define SW_TX       6   // SoftwareSerial TX → TMC2209 PDN_UART (via 1K resistor)
+  #define R_SENSE     0.11f   // BTT TMC2209 sense resistor value
+  #define DRIVER_ADDR 0       // MS1=GND, MS2=GND → address 0
+
+  SoftwareSerial TMC_serial(SW_RX, SW_TX);
+  TMC2209Stepper driver(&TMC_serial, R_SENSE, DRIVER_ADDR);
+
+  void setup() {
+    Serial.begin(115200);
+    TMC_serial.begin(115200);
+
+    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN, OUTPUT);
+    pinMode(EN_PIN, OUTPUT);
+    digitalWrite(EN_PIN, LOW);      // Enable driver
+
+    driver.begin();
+    driver.toff(4);                 // Enable driver via UART
+    driver.rms_current(600);        // Set motor current to 600mA
+    driver.microsteps(16);          // Set 16x microstepping
+    driver.en_spreadCycle(false);   // Use StealthChop (quiet mode)
+    driver.pwm_autoscale(true);     // Enable automatic current scaling
+    driver.TCOOLTHRS(0xFFFFF);      // Enable StallGuard at all speeds
+    driver.SGTHRS(80);              // StallGuard threshold (tune for your motor)
+
+    Serial.println("TMC2209 UART configured");
+    Serial.print("Driver version: 0x");
+    Serial.println(driver.version(), HEX);  // Should print 0x21
+  }
+
+  void loop() {
+    digitalWrite(DIR_PIN, HIGH);
+
+    for (int i = 0; i < 3200; i++) {   // 1 rev at 16 microsteps
+      digitalWrite(STEP_PIN, HIGH);
+      delayMicroseconds(400);
+      digitalWrite(STEP_PIN, LOW);
+      delayMicroseconds(400);
+    }
+
+    delay(1000);
+    digitalWrite(DIR_PIN, LOW);
+
+    for (int i = 0; i < 3200; i++) {
+      digitalWrite(STEP_PIN, HIGH);
+      delayMicroseconds(400);
+      digitalWrite(STEP_PIN, LOW);
+      delayMicroseconds(400);
+    }
+
+    delay(1000);
+  }
+
+
+================================================================================
+  TROUBLESHOOTING
+================================================================================
+
+  Problem                          Check
+  ───────────────────────────────  ──────────────────────────────────────────
+  Motor doesn't move at all        1. Is EN pin LOW? (LOW = enabled)
+                                   2. Is VMOT getting 12-24V? (measure it)
+                                   3. Is VCC_IO connected to 5V?
+                                   4. Is 100uF cap on VMOT?
+                                   5. Are STEP/DIR wires connected?
+                                   6. Is VREF pot not turned to zero?
+
+  Motor vibrates but won't spin    1. Wrong coil wiring — swap A1↔A2 or B1↔B2
+                                   2. One coil wire disconnected
+                                   3. Step rate too high — reduce speed
+
+  Motor runs but skips steps       1. Increase motor current (VREF pot or UART)
+                                   2. Reduce speed / acceleration
+                                   3. Check mechanical binding
+
+  Motor very hot                   1. Reduce motor current (VREF pot or UART)
+                                   2. Enable StealthChop for lower heat
+                                   3. Check current rating of your motor
+
+  TMC2209 gets very hot            1. VMOT voltage too high (max 29V)
+                                   2. Motor current set too high
+                                   3. Missing or bad VMOT capacitor
+
+  UART not responding              1. Check 1K resistor on TX line
+                                   2. TX and RX both go to same PDN_UART pin
+                                   3. MS1/MS2 must match DRIVER_ADDR
+                                   4. Check baud rate matches (115200)
+                                   5. driver.version() should return 0x21
+
+  Motor direction is reversed      1. Swap DIR pin logic (HIGH↔LOW)
+                                   2. Or swap one motor coil pair (A1↔A2)
+
+  StallGuard not detecting stall   1. Adjust SGTHRS value (0-255)
+                                   2. Motor must be moving above TCOOLTHRS
+                                   3. StallGuard less reliable at low speeds
+
+
+================================================================================
+  POWER NOTES
+================================================================================
+
+  - NEVER connect VMOT to the Arduino 5V or VIN
+  - VMOT must come from an external 12-24V power supply
+  - The Arduino and TMC2209 MUST share a common GND
+  - VCC_IO connects to Arduino 5V (logic level reference)
+  - Arduino can be USB-powered separately from the motor supply
+  - Total current draw from Arduino 5V pin: ~20mA for TMC2209 VCC_IO (safe)
+  - Motor supply should be rated for at least 1A per driver at your VMOT voltage
+
+
+================================================================================
+  QUICK REFERENCE — MINIMUM VIABLE WIRING (3 wires + power)
+================================================================================
+
+  If you just want to get a motor spinning with the fewest connections:
+
+    Arduino Uno        BTT TMC2209
+    ────────────       ─────────────
+    D2          →      STEP
+    D3          →      DIR
+    GND         →      EN              (tie EN to GND = always enabled)
+    5V          →      VCC_IO
+    GND         →      GND
+    (external)  →      VMOT 12-24V (+)
+    (external)  →      GND  12-24V (-)
+
+  Total: 5 wires to Arduino + 2 wires from power supply + 4 motor wires
+  MS1/MS2 left floating = 1/16 microstepping (default)
+
+================================================================================
