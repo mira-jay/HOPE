@@ -24,6 +24,8 @@ import time
 import sys
 import threading
 
+time.sleep(2) 
+
 # ── Configuration ─────────────────────────────────────────────
 PORT = "/dev/ttyACM0"    # Change if your Teensy enumerates differently
 BAUD = 115200
@@ -243,8 +245,8 @@ def main():
         sys.exit(1)
 
     # Start background reader
-    reader = TeensyReader(ser)
-    reader.start()
+    # reader = TeensyReader(ser)
+    # reader.start()
 
     results = {}
 
@@ -302,7 +304,7 @@ def main():
         send(ser, "CMD_STOP")
 
     finally:
-        reader.stop()
+        # reader.stop()
         send(ser, "CMD_STOP")
         ser.close()
         print("Serial port closed.")

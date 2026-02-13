@@ -74,7 +74,6 @@ def control_motor(x):
          GPIO.gpio_write(h, AN22, 0)
          GPIO.gpio_write(h, BN21, 1)
          GPIO.gpio_write(h, BN22, 0)
-         print("reversal")
          x='z'
         else:
          GPIO.gpio_write(h, AN11, 0)
@@ -101,8 +100,8 @@ def control_motor(x):
         GPIO.gpio_write(h, BN22, 0)
         x='z'
 
-    elif x=='f':
-        print("forward")
+    elif x=='b':
+        print("backward")
         GPIO.gpio_write(h, AN11, 0)
         GPIO.gpio_write(h, AN12, 1)
         GPIO.gpio_write(h, BN11, 0)
@@ -114,8 +113,8 @@ def control_motor(x):
         temp1=0
         x='z'
 
-    elif x=='b':
-        print("reversal")
+    elif x=='f':
+        print("forward")
         GPIO.gpio_write(h, AN11, 1)
         GPIO.gpio_write(h, AN12, 0)
         GPIO.gpio_write(h, BN11, 1)
@@ -152,9 +151,9 @@ def control_motor(x):
 
 
 init()
-#control_motor("h")
-control_motor("b")
-control_motor("r")
+control_motor("h")
+control_motor("f")
+#control_motor("r")
 
 sleep(10.00)
 
