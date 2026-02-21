@@ -4,5 +4,5 @@ from ultralytics import YOLO # this code is meant to be run from the Mac.
 model = YOLO('yolov8n.yaml')  # build a new model from scratch using the YOLOv8 nano architecture
 
 # use the model
-results = model.train(data='/Users/Mira/Projects/Git Repository/machine_learning_data/yolo_v8/yolo_config.yaml', epochs=3) # train the model
+results = model.train(data='/Users/Mira/Projects/Git Repository/machine_learning_data/yolo_v8/yolo_config.yaml', epochs=25) # train the model
 
