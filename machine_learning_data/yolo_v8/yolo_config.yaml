@@ -1,0 +1,10 @@
+# this code is meant to be run from the Mac.
+path: '/Users/Mira/Projects/datasets' # dataset root directory containing images and labels
+train: images # train images (relative to path)
+val: images # val images (relative to path)
+
+# classes
+names:
+  0: Extremity
+  1: Abdominal
+  2: Chest
