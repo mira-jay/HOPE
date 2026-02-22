@@ -1,6 +1,7 @@
 import xarm
 
-arm = xarm.Controller("USBD30F103095D182300023D4D4") # blue
+# arm = xarm.Controller("USBD30F103095D182300023D4D4") # blue
+arm = xarm.Controller("USB5306101095D182300023D4D4") # black
 
 #servo1 = xarm.Servo(1)
 servo2 = xarm.Servo(2)
