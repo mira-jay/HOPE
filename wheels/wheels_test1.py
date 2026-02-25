@@ -2,7 +2,7 @@ import serial
 import time
 
 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
-time.sleep(2)
+#time.sleep(2)
 
 def control_wheels(command):
     ser.write(command.encode('ascii'))

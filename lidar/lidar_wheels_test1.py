@@ -1,6 +1,7 @@
 # remember, xarm_venv must be activated for code to work.
 import os
-
+import serial
+import time
 
 from adafruit_rplidar import RPLidar
 
@@ -10,6 +11,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+
+# set up wheels code
+from wheels import wheels_test1
 
 
 # set up the RPLidar
@@ -43,14 +47,16 @@ def make_ani(update):
 
     iterator = lidar.iter_scans(max_buf_meas = 5000)
     ani = animation.FuncAnimation(fig, update, frames = 75, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
-    ani.save("lidar/lidar3.mp4", writer = "ffmpeg", fps = 15)
+    ani.save("lidar/lidar4.mp4", writer = "ffmpeg", fps = 15)
 
      
 
 if __name__ == "__main__":
 
     try:
+        wheels_test1.control_wheels('1')
         make_ani(update_line)
+        wheels_test1.control_wheels('0')
 
 
     except KeyboardInterrupt:
