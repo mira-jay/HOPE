@@ -1,17 +1,17 @@
 import xarm
 
-# arm = xarm.Controller("USBD30F103095D182300023D4D4") # blue
-arm = xarm.Controller("USB5306101095D182300023D4D4") # black
+arm = xarm.Controller("USBC10E2031D60063300023D4D4") # blue
+#arm = xarm.Controller("USB5306101095D182300023D4D4") # black
 
 #servo1 = xarm.Servo(1)
-servo2 = xarm.Servo(2)
+#servo2 = xarm.Servo(2)
 servo3 = xarm.Servo(3)
 servo4 = xarm.Servo(4)
 servo5 = xarm.Servo(5)
 servo6 = xarm.Servo(6)
 
 #print("servo1 angle: ", arm.getPosition(servo1))
-print("servo2 angle: ", arm.getPosition(servo2))
+#print("servo2 angle: ", arm.getPosition(servo2))
 print("servo3 angle: ", arm.getPosition(servo3))
 print("servo4 angle: ", arm.getPosition(servo4))
 print("servo5 angle: ", arm.getPosition(servo5))

@@ -6,7 +6,7 @@ import xarm
 #initialization
 motor_driver_test1.init()
 black = xarm.Controller("USB5306101095D182300023D4D4")
-blue = xarm.Controller("USBD30F103095D182300023D4D4")
+blue = xarm.Controller("USBC10E2031D60063300023D4D4")
 
 
 #set servos for blue
@@ -49,7 +49,6 @@ time.sleep(5.00)
 motor_driver_test1.M2("b")
 time.sleep(5.00)
 motor_driver_test1.M2("s")
-time.sleep(5.00)
 
 # blue grab patch
 blue.setPosition(6, 865, 2000, wait=True)
@@ -57,7 +56,7 @@ blue.setPosition(5, 500, 2000, wait = True)
 blue.setPosition(4, 900, 2000, wait = True)
 blue.setPosition(3, 100, 2000, wait =True)
 motor_driver_test1.M1("f")
-time.sleep(20.00)
+time.sleep(5.00)
 
 # blue spray position
 #blue.setPosition(5, 600, wait=True)
@@ -70,7 +69,7 @@ blue.setPosition(5, 870, 2000, wait = True)
 black.setPosition(4, 495, wait = True)
 black.setPosition(3, 830, wait = True)
 black.setPosition(2, 433, wait = True)
-black.setPosition(1, 400, wait = True)
+black.setPosition(1, 500, wait = True)
 black.setPosition(1, 315, wait=True)
 time.sleep(2.00)
 
