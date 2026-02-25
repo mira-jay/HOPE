@@ -1,0 +1,6 @@
+from ultralytics import YOLO
+
+model = YOLO("/Users/Mira/Projects/Git Repository/runs/detect/train5/weights/best.pt")
+
+# export model to onnx format
+model.export(format="onnx") # creates yolov8n.onnx
