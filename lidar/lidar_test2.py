@@ -29,10 +29,8 @@ def update_line(num, iterator, line):
     intents = np.array([meas[0] for meas in scan])
     line.set_array(intents)
     return line
-     
 
-
-try:
+def make_ani(update):
     plt.rcParams["toolbar"] = "None"
     fig = plt.figure()
 
@@ -44,13 +42,22 @@ try:
     ax.grid(True)
 
     iterator = lidar.iter_scans(max_buf_meas = 5000)
-    ani = animation.FuncAnimation(fig, update_line, frames = 75, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
+    ani = animation.FuncAnimation(fig, update, frames = 75, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
     ani.save("lidar/lidar1.mp4", writer = "ffmpeg", fps = 15)
 
+     
+
+if __name__ == "__main__":
+
+    try:
+        x = update_line()
+        "TypeError: update_line() missing 3 required positional arguments: 'num', 'iterator', and 'line'
+
+        make_ani(x)
 
 
-except KeyboardInterrupt:
-    print("stopping.")
-    lidar.stop()
-    lidar.stop_motor()
-    lidar.disconnect()
+    except KeyboardInterrupt:
+        print("stopping.")
+        lidar.stop()
+        lidar.stop_motor()
+        lidar.disconnect()
