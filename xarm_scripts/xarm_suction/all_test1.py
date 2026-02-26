@@ -65,7 +65,7 @@ blue.setPosition(2, 679, wait = True)
 
 # set default for black
 black.setPosition(5, 881, wait=True)
-# s6 is not moving
+#black.setPosition(6, 500, wait = True)
 black.setPosition(4, 488, wait = True)
 black.setPosition(3, 859, wait = True)
 black.setPosition(2, 462, wait = True)
