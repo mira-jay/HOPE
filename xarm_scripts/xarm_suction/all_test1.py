@@ -40,7 +40,6 @@ wheels_test1.control_wheels('1')
 lidar_proc.join()
 wheels_test1.control_wheels('0')
 
-display_test1.stop_image(display_proc)
 
 #set servos for blue
 blue_servo2 = xarm.Servo(2)
@@ -113,3 +112,5 @@ blue.setPosition(4, 486, 2000, wait = True)
 blue.setPosition(3, 103, 2000, wait = True)
 time.sleep(3.00)
 motor_driver_test1.M1("s")
+
+display_test1.stop_image(display_proc)

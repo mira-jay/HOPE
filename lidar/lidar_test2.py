@@ -46,7 +46,7 @@ def make_ani(update):
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H:%M:%S')
 
     iterator = lidar.iter_scans(max_buf_meas = 5000)
-    ani = animation.FuncAnimation(fig, update, frames = 150, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
+    ani = animation.FuncAnimation(fig, update, frames = 75, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
     ani.save(f"lidar/lidar_{timestamp}.mp4", writer = "ffmpeg", fps = 15)
 
      
