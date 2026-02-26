@@ -18,10 +18,9 @@ import matplotlib.animation as animation
 import numpy as np
 
 # display dependencies
-import subprocess
+import multiprocessing
 import os
-
-
+import sys
 
 
 #initialization
@@ -29,6 +28,8 @@ motor_driver_test1.init()
 black = xarm.Controller("USB5306101095D182300023D4D4")
 blue = xarm.Controller("USBC10E2031D60063300023D4D4")
 
+# display process
+display_proc = display_test1.show_image('/home/hope/hopedevice/SOAR_face.jpeg')
 
 #set servos for blue
 blue_servo2 = xarm.Servo(2)

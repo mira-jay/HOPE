@@ -1,4 +1,5 @@
 # remember, xarm_venv must be activated for code to work.
+# this code is NOT functional due to issues with the imports.
 import os
 import serial
 import time
