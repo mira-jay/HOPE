@@ -83,10 +83,10 @@ time.sleep(5.00)
 motor_driver_test1.M2("s")
 
 # blue grab patch
-blue.setPosition(6, 865, 2000, wait=True)
-blue.setPosition(5, 500, 2000, wait = True)
-blue.setPosition(4, 900, 2000, wait = True)
-blue.setPosition(3, 100, 2000, wait =True)
+blue.setPosition(6, 871, 2000, wait=True) #865
+blue.setPosition(5, 517, 2000, wait = True) #500
+blue.setPosition(4, 807, 2000, wait = True) #900
+blue.setPosition(3, 73, 2000, wait =True) #100
 motor_driver_test1.M1("f")
 time.sleep(5.00)
 
