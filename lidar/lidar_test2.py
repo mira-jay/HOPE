@@ -1,5 +1,6 @@
 # remember, xarm_venv must be activated for code to work.
 import os
+import datetime
 
 
 from adafruit_rplidar import RPLidar
@@ -19,6 +20,7 @@ lidar = RPLidar(None, PORT_NAME, baudrate = 115200, timeout=3)
 d_max: int = 1000
 i_min: int = 0
 i_max: int = 100
+
 
 
 def update_line(num, iterator, line):
@@ -41,9 +43,11 @@ def make_ani(update):
 
     ax.grid(True)
 
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H:%M:%S')
+
     iterator = lidar.iter_scans(max_buf_meas = 5000)
-    ani = animation.FuncAnimation(fig, update, frames = 75, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
-    ani.save("lidar/lidar3.mp4", writer = "ffmpeg", fps = 15)
+    ani = animation.FuncAnimation(fig, update, frames = 150, fargs = (iterator, line), interval = 50, blit= False, cache_frame_data = False)
+    ani.save(f"lidar/lidar_{timestamp}.mp4", writer = "ffmpeg", fps = 15)
 
      
 

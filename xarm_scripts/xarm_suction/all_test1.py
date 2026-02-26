@@ -31,6 +31,17 @@ blue = xarm.Controller("USBC10E2031D60063300023D4D4")
 # display process
 display_proc = display_test1.show_image('/home/hope/hopedevice/SOAR_face.jpeg')
 
+# lidar process
+lidar_proc = multiprocessing.Process(target= lidar_test2.make_ani, args =(lidar_test2.update_line,))
+lidar_proc.start()
+
+#wheels control
+wheels_test1.control_wheels('1')
+lidar_proc.join()
+wheels_test1.control_wheels('0')
+
+display_test1.stop_image(display_proc)
+
 #set servos for blue
 blue_servo2 = xarm.Servo(2)
 blue_servo3 = xarm.Servo(3)
