@@ -1,0 +1,116 @@
+# this is the code for the video
+from suction import motor_driver_test1
+import time
+import xarm
+#from wheels import wheels_test1
+#from lidar import lidar_test2
+from display import display_test1
+
+# wheels dependencies
+#import serial
+
+# lidar dependencies
+from adafruit_rplidar import RPLidar
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+
+# display dependencies
+import multiprocessing
+import os
+import sys
+
+
+#initialization
+motor_driver_test1.init()
+black = xarm.Controller("USB5306101095D182300023D4D4")
+blue = xarm.Controller("USBC10E2031D60063300023D4D4")
+
+# display process
+display_proc = display_test1.show_image('/home/hope/hopedevice/SOAR_face.jpeg')
+
+# lidar process
+#lidar_proc = multiprocessing.Process(target= lidar_test2.make_ani, args =(lidar_test2.update_line,))
+#lidar_proc.start()
+
+#wheels control
+#wheels_test1.control_wheels('1')
+#lidar_proc.join()
+#wheels_test1.control_wheels('0')
+
+
+#set servos for blue
+blue_servo2 = xarm.Servo(2)
+blue_servo3 = xarm.Servo(3)
+blue_servo4 = xarm.Servo(4)
+blue_servo5 = xarm.Servo(5)
+blue_servo6 = xarm.Servo(6)
+
+#set servos for black
+black_servo1 = xarm.Servo(1)
+black_servo2 = xarm.Servo(2)
+black_servo3 = xarm.Servo(3)
+black_servo4 = xarm.Servo(4)
+black_servo5 = xarm.Servo(5)
+black_servo6 = xarm.Servo(6)
+
+# set default position for blue (do s5 before s6)
+blue.setPosition(5, 1000, wait=True)
+blue.setPosition(6, 136, wait=True)
+blue.setPosition(4, 486, wait = True)
+blue.setPosition(3, 103, wait = True)
+blue.setPosition(2, 679, wait = True)
+
+# set default for black
+black.setPosition(5, 881, wait=True)
+#black.setPosition(6, 500, wait = True)
+black.setPosition(4, 488, wait = True)
+black.setPosition(3, 859, wait = True)
+black.setPosition(2, 462, wait = True)
+black.setPosition(1, 315, wait = True)
+'''
+# blue dispense sponge
+blue.setPosition(5, 1000, wait=True)
+blue.setPosition(4, 486, wait = True)
+blue.setPosition(3, 103, wait = True) '''
+motor_driver_test1.set_speed("h")
+'''motor_driver_test1.M2("f")
+time.sleep(5.00)
+motor_driver_test1.M2("b")
+time.sleep(5.00)
+motor_driver_test1.M2("s")
+'''
+
+# blue grab patch
+blue.setPosition(6, 871, 2000, wait=True) #865
+blue.setPosition(5, 517, 2000, wait = True) #500
+blue.setPosition(4, 807, 2000, wait = True) #900
+blue.setPosition(3, 73, 2000, wait =True) #100
+motor_driver_test1.M1("f")
+time.sleep(5.00)
+
+# blue spray position
+#blue.setPosition(5, 600, wait=True)
+blue.setPosition(4, 362, 2000, wait=True)
+blue.setPosition(3, 751, 2000, wait=True)
+blue.setPosition(6, 490, 2000, wait = True)
+blue.setPosition(5, 870, 2000, wait = True)
+
+# black spray
+black.setPosition(4, 495, wait = True)
+black.setPosition(3, 830, wait = True)
+black.setPosition(2, 433, wait = True)
+black.setPosition(1, 500, wait = True)
+black.setPosition(1, 315, wait=True)
+time.sleep(2.00)
+
+# blue place patch
+blue.setPosition(6, 136, 2000, wait=True)
+blue.setPosition(5, 1000, 2000, wait=True)
+blue.setPosition(4, 486, 2000, wait = True)
+blue.setPosition(3, 103, 2000, wait = True)
+time.sleep(2.00)
+motor_driver_test1.M1("s")
+display_test1.stop_image(display_proc)
